@@ -1,6 +1,6 @@
 & 'D:\setup.exe' /ConfigurationFile=C:\temp\ConfigurationFile.ini
 # Download Ola's scripts
-#Invoke-WebRequest -URI https://ola.hallengren.com/scripts/MaintenanceSolution.sql > C:\temp\ola.sql
+invoke-WebRequest https://ola.hallengren.com/scripts/MaintenanceSolution.sql -outfile c:\temp\ola.sql
 
 $CMD = 'C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\130\Tools\Binn\SQLCMD.EXE'
 $ARG1 = '-E'
