@@ -6,8 +6,6 @@ A few assumptions here:
 
 --You have SQL Media mounted to the D: drive
 
---You have Ola Hallengen's scripts in C:\temp. I'm having an issue with invoke-webrequest in Windows 2016 that I need to get worked out
-
 --The SSMS silent installer doesn't offer any indication of progress, and has worked about 50% of the time in my testing
 
 --Even though SQL Server 2016 does not require .NET 3.5, Database Mail does. I'm currently waiting to hear back to see if this fixed in CU1
