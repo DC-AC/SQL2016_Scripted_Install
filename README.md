@@ -1,4 +1,4 @@
-# SQL2016_ScriptedInstall
+# SQL2016_Scripted_Install
 
 This is SQL 2016 scripted install process. There is a best practices script which configures SQL Server with best practices. 
 
