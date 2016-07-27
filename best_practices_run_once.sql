@@ -239,6 +239,11 @@ BEGIN
     GOTO done;
 END;
 
+EXEC msdb.dbo.sp_set_sqlagent_properties @email_save_in_sent_folder=1, 
+		@databasemail_profile=N'dbmail_profile', 
+		@use_databasemail=1
+GO
+
 COMMIT TRANSACTION;
 
 done:
@@ -398,4 +403,4 @@ EXEC msdb.dbo.sp_add_alert @name=N'Error Number 825',
 GO
 EXEC msdb.dbo.sp_add_notification @alert_name=N'Error Number 825', @operator_name=N'The DBA Team', @notification_method = 7;
 GO
-RAISERROR (N'This is test error.', 17,1)
+RAISERROR (N'This is test error.', 17,1) WITH LOG
