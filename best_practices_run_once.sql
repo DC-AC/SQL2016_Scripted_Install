@@ -1,6 +1,6 @@
 /******  BEST PRACTICES  ******/
 
---enable trace flags for tempdb allocation
+--Edit line 69/70 for proper TempDB file sizes. For testing volume is set to 2 GB, for prod use the line of code which gets the volume size
 --Trace Flag 3226    Suppress the backup transaction log entries from the SQL Server Log
 
 create procedure enable_trace_flags as
@@ -13,19 +13,18 @@ exec sp_procoption @procname='enable_trace_flags', @optionName='startup', @optio
 
 exec enable_trace_flags;
 
-
-EXEC sp_configure 'show advanced options', '1';
-RECONFIGURE
+/* Disable SA Login */
+ALTER LOGIN [sa] DISABLE
 GO
 
 --modify model database
 ALTER DATABASE model SET RECOVERY SIMPLE;
 GO
 ALTER DATABASE model MODIFY FILE (NAME = modeldev, FILEGROWTH = 100MB)
-go
+GO
 
 ALTER DATABASE model MODIFY FILE (NAME = modellog, FILEGROWTH = 100MB)
-go
+GO
 
 
 --modify msdb database
@@ -51,7 +50,7 @@ go
 /******  CONFIGURE TEMPDB  DATA FILES ******/
 
 declare @sql_statement nvarchar(4000),
-		@data_file_path nvarchar(100),
+  	@data_file_path nvarchar(100),
 		@drive_size_gb int,
 		@individ_file_size int,
 		@number_of_files int;
