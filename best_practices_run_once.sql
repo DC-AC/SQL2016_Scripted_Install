@@ -122,18 +122,30 @@ WHILE @number_of_files > 0
 
 
 EXEC sp_configure 'min server memory', '1024';
- -- change to #GB * 1024, leave 2 GB per system for OS, 4GB if over 16GB RAM
 RECONFIGURE WITH OVERRIDE;
 
 DECLARE @sqlmemory INT;
-SELECT  @sqlmemory = CONVERT(INT, ( physical_memory_kb / 1024 * .75 ))
+SELECT  @sqlmemory = CONVERT(INT( physical_memory_kb)/1024
 FROM    sys.dm_os_sys_info;
+
+DECLARE @sqlmemory INT;
+SELECT  @sqlmemory = CONVERT(INT,physical_memory_kb)/1024
+FROM    sys.dm_os_sys_info;
+
+
+IF @sqlmemory > 16384
+SET @sqlmemory = @sqlmemory-(8192)
+ELSE
+		IF @sqlmemory > 4096 and @sqlmemory < 16384
+		SET @sqlmemory = @sqlmemory - (4096)
+		ELSE
+		SET @sqlmemory=@sqlmemory*.5
+	
+--PRINT @sqlmemory
 
 EXEC sp_configure 'max server memory', @sqlmemory;
  -- change to #GB * 1024, leave 2 GB per system for OS, 4GB if over 16GB RAM
 RECONFIGURE WITH OVERRIDE;
-
-
 
 /*SELECT MaxDOP for Server Based on CPU Count */
 
