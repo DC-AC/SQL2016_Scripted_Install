@@ -13,3 +13,5 @@ A few assumptions here:
 --This looks for updates in C:\SQLUpdates, you may wish to update to a different drive (a network share works well)
 
 --This script puts data files on the E: drive--you may need to change for Azure VMs
+
+--You need to edit the DB Mail settings for your SMTP server.
