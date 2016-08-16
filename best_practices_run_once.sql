@@ -3,7 +3,9 @@
 --Edit line 69/70 for proper TempDB file sizes. For testing volume is set to 2 GB, for prod use the line of code which gets the volume size
 --Trace Flag 3226    Suppress the backup transaction log entries from the SQL Server Log
 
-CREATE PROCEDURE enable_trace_flags
+USE MASTER
+GO
+CREATE PROCEDURE dbo.enable_trace_flags
 AS
     DBCC TRACEON (3226, -1); 
     DBCC TRACEON (1222, -1);
@@ -118,14 +120,6 @@ WHILE @number_of_files > 0
     END;
 
 
-
-EXEC sp_configure 'min server memory', '1024';
-RECONFIGURE WITH OVERRIDE;
-
-DECLARE @sqlmemory INT;
-SELECT  @sqlmemory = CONVERT(INT( physical_memory_kb)/1024
-FROM    sys.dm_os_sys_info;
-
 DECLARE @sqlmemory INT;
 SELECT  @sqlmemory = CONVERT(INT,physical_memory_kb)/1024
 FROM    sys.dm_os_sys_info;
@@ -233,51 +227,56 @@ IF EXISTS ( SELECT  *
         GOTO done;
     END;
 
+
+	
 -- Start a transaction before adding the account and the profile
-BEGIN TRANSACTION;
+BEGIN TRANSACTION ;
 
 DECLARE @rv INT;
-
+ 
+SELECT @err='Failed to create the specified Database Mail account '+@account_name
+    
 -- Add the account
-EXECUTE @rv= msdb.dbo.sysmail_add_account_sp @account_name = @account_name,
-    @email_address = @email_address, @display_name = @display_name,
-    @mailserver_name = @SMTP_servername, @port = 587, @username = '$useranme',
-    @password = '$password', @enable_ssl = 1;
+EXECUTE @rv=msdb.dbo.sysmail_add_account_sp
+    @account_name = @account_name,
+    @email_address = @email_address,
+    @display_name = @display_name,
+    @mailserver_name = @SMTP_servername;
 
-IF @rv <> 0
-    BEGIN
-        RAISERROR(@err, 16, 1);
-        GOTO done;
-    END;
-  
+IF @rv<>0
+BEGIN
+    RAISERROR(@err, 16, 1) ;
+    GOTO done;
+END
+
 -- Add the profile
-EXECUTE @rv= msdb.dbo.sysmail_add_profile_sp @profile_name = @profile_name;
+EXECUTE @rv=msdb.dbo.sysmail_add_profile_sp
+    @profile_name = @profile_name ;
 
-IF @rv <> 0
-    BEGIN
-        RAISERROR(@err, 16, 1);
-        ROLLBACK TRANSACTION;
-        GOTO done;
-    END;
+IF @rv<>0
+BEGIN
+    RAISERROR(@err, 16, 1);
+      ROLLBACK TRANSACTION;
+    GOTO done;
+END;
 
 -- Associate the account with the profile.
-EXECUTE @rv= msdb.dbo.sysmail_add_profileaccount_sp @profile_name = @profile_name,
-    @account_name = @account_name, @sequence_number = 1;
+EXECUTE @rv=msdb.dbo.sysmail_add_profileaccount_sp
+    @profile_name = @profile_name,
+    @account_name = @account_name,
+    @sequence_number = 1 ;
 
-IF @rv <> 0
-    BEGIN
-        RAISERROR('Failed to associate the speficied profile with the specified account (<account_name,sysname,SampleAccount>).', 16, 1);
-        ROLLBACK TRANSACTION;
-        GOTO done;
-    END;
-
-EXEC msdb.dbo.sp_set_sqlagent_properties @email_save_in_sent_folder = 1,
-    @databasemail_profile = N'dbmail_profile', @use_databasemail = 1;
-GO
+IF @rv<>0
+BEGIN
+    RAISERROR('Failed to associate the speficied profile with the specified account (DB mailer).', 16, 1) ;
+      ROLLBACK TRANSACTION;
+    GOTO done;
+END;
 
 COMMIT TRANSACTION;
 
 done:
+
 
 DECLARE @msg VARCHAR(1000);
 SELECT  @msg = 'Automated Success Message for server ' + @@servername; 
