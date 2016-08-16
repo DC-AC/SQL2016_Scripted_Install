@@ -95,8 +95,7 @@ WHILE @number_of_files > 0
                 SELECT  @sql_statement = 'ALTER DATABASE tempdb MODIFY FILE (NAME = tempdev, SIZE = '
                         + CONVERT(NVARCHAR(25), @individ_file_size)
                         + ', filename = ' + NCHAR(39) + @data_file_path
-                        + 'tempdb.mdf' + NCHAR(39) + ',MAXSIZE = '
-                        + CONVERT(NVARCHAR(25), @individ_file_size)
+                        + 'tempdb.mdf' + NCHAR(39) 
                         + ', FILEGROWTH = 100MB);';
             END;
         ELSE -- numbered tempdb file, add and re-size
@@ -108,8 +107,7 @@ WHILE @number_of_files > 0
                         + CONVERT(NVARCHAR(25), @number_of_files) + '.ndf'
                         + NCHAR(39) + ', SIZE = '
                         + CONVERT(VARCHAR(25), @individ_file_size)
-                        + ', MAXSIZE = '
-                        + CONVERT(NVARCHAR(25), @individ_file_size)
+              
                         + ', FILEGROWTH = 100MB);';
             END;
 		
