@@ -125,17 +125,31 @@ SELECT  @sqlmemory = CONVERT(INT,physical_memory_kb)/1024
 FROM    sys.dm_os_sys_info;
 
 
-IF @sqlmemory > 16384
-SET @sqlmemory = @sqlmemory-(8192)
-ELSE
-		IF @sqlmemory > 4096 and @sqlmemory < 16384
-		SET @sqlmemory = @sqlmemory - (4096)
-		ELSE
-		SET @sqlmemory=@sqlmemory*.5
-	
---PRINT @sqlmemory
+IF @sqlmemory < 4096
+SELECT @sqlmemory = @sqlmemory*.5
+									  
+ELSE 
+									  
+DECLARE @sqlmax INT    
+DECLARE @currentCount INT
+DECLARE @reserve INT = 0
+ 
+SELECT @currentCount=@sqlmemory
+      
+       WHILE @currentCount > 16384
+       BEGIN 
+         IF (@currentCount/4096 > 0)
+              BEGIN
+                SET  @reserve=@reserve + 1
+                SET  @currentCount=@currentCount-8192
+ 
+              END
+       END   
+      
+SELECT @sqlmax=@sqlmemory+(@currentcount-(@reserve * 1024))
+ 
 
-EXEC sp_configure 'max server memory', @sqlmemory;
+EXEC sp_configure 'max server memory', @sqlmAX;
  -- change to #GB * 1024, leave 2 GB per system for OS, 4GB if over 16GB RAM
 RECONFIGURE WITH OVERRIDE;
 
