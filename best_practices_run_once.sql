@@ -434,7 +434,7 @@ EXEC msdb.dbo.sp_add_jobschedule @job_name=N'DatabaseBackup - SYSTEM_DATABASES -
 		@active_end_date=99991231, 
 		@active_start_time=230000, 
 		@active_end_time=235959, @schedule_id = @schedule_id OUTPUT
-select @schedule_id
+
 GO
 
 USE [msdb]
@@ -452,7 +452,7 @@ EXEC msdb.dbo.sp_add_jobschedule @job_name=N'DatabaseBackup - USER_DATABASES - F
 		@active_end_date=99991231, 
 		@active_start_time=230000, 
 		@active_end_time=235959, @schedule_id = @schedule_id OUTPUT
-select @schedule_id
+
 GO
 
 
@@ -471,7 +471,7 @@ EXEC msdb.dbo.sp_add_jobschedule @job_name=N'DatabaseBackup - USER_DATABASES - L
 		@active_end_date=99991231, 
 		@active_start_time=0, 
 		@active_end_time=235959, @schedule_id = @schedule_id OUTPUT
-select @schedule_id
+
 GO
 
 
@@ -490,7 +490,7 @@ EXEC msdb.dbo.sp_add_jobschedule @job_name=N'IndexOptimize - USER_DATABASES', @n
 		@active_end_date=99991231, 
 		@active_start_time=60000, 
 		@active_end_time=235959, @schedule_id = @schedule_id OUTPUT
-select @schedule_id
+
 GO
 
 USE [msdb]
@@ -508,7 +508,7 @@ EXEC msdb.dbo.sp_add_jobschedule @job_name=N'DatabaseIntegrityCheck - SYSTEM_DAT
 		@active_end_date=99991231, 
 		@active_start_time=60000, 
 		@active_end_time=235959, @schedule_id = @schedule_id OUTPUT
-select @schedule_id
+
 GO
 
 USE [msdb]
@@ -526,6 +526,6 @@ EXEC msdb.dbo.sp_add_jobschedule @job_name=N'DatabaseIntegrityCheck - USER_DATAB
 		@active_end_date=99991231, 
 		@active_start_time=60000, 
 		@active_end_time=235959, @schedule_id = @schedule_id OUTPUT
-select @schedule_id
+
 GO
 
