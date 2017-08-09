@@ -146,7 +146,7 @@ SELECT @currentCount=@sqlmemory
               END
        END   
       
-SELECT @sqlmax=@sqlmemory+(@currentcount-(@reserve * 1024))
+SELECT @sqlmax=@sqlmemory-(@reserve * 1024)
  
 
 EXEC sp_configure 'max server memory', @sqlmAX;
