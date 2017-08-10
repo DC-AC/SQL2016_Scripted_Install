@@ -48,7 +48,10 @@ GO
 ALTER DATABASE master MODIFY FILE (NAME = mastlog, FILEGROWTH = 100MB);
 GO
 
-
+sp_configure 'set advanced options', 1
+GO
+RECONFIGURE WITH OVERRIDE
+GO
 
 /******  CONFIGURE TEMPDB  DATA FILES ******/
 
@@ -118,38 +121,43 @@ WHILE @number_of_files > 0
 		
         SELECT  @number_of_files = @number_of_files - 1;
     END;
-
-
-DECLARE @sqlmemory INT;
-SELECT  @sqlmemory = CONVERT(INT,physical_memory_kb)/1024
-FROM    sys.dm_os_sys_info;
-
-
-IF @sqlmemory < 4096
-SELECT @sqlmemory = @sqlmemory*.5
 									  
-ELSE 
-									  
-DECLARE @sqlmax INT    
-DECLARE @currentCount INT
-DECLARE @reserve INT = 0
- 
-SELECT @currentCount=@sqlmemory
-      
-       WHILE @currentCount > 16384
-       BEGIN 
-         IF (@currentCount/4096 > 0)
-              BEGIN
-                SET  @reserve=@reserve + 1
-                SET  @currentCount=@currentCount-8192
- 
-              END
-       END   
-      
-SELECT @sqlmax=@sqlmemory-(@reserve * 1024)
+				
+-- TODO: Consider type
+;DECLARE @sqlmemory INT
+with physical_mem (physical_memory_mb) as
+(
+ select physical_memory_kb / 1024 
+ from sys.dm_os_sys_info
+)
+select @sqlmemory =
+ -- Reserve 1 GB for OS 
+ -- TODO: Handling of < 1 GB RAM
+ physical_memory_mb - 1024 - 
+ ( 
+ case 
+ -- If 16 GB or more, reserve an additional 4 GB
+ when physical_memory_mb >= 16384 then 4092
+ -- If between 4 and 16 GB, reserve 1 GB for every 4 GB
+ -- TODO: Clarify if 4 GB is inclusive or exclusive minimum. This is exclusive.
+ -- TODO: Clarify if 16 GB is inclusive or exclusive maximum. This is inclusive.
+ when physical_memory_mb > 4092 and physical_memory_mb < 16384 then physical_memory_mb / 4 
+ else 0 end
+ )
+ -
+ (
+ case 
+ -- Reserve 1 GB for every 8 GB above 16 GB
+ -- TODO: Clarify if 16 GB is inclusive or exclusive minimum. This is exclusive.
+ when physical_memory_mb > 16384 then ( physical_memory_mb - 16384 )/ 8
+ else 0
+ end
+ )
+from physical_mem
+
  
 
-EXEC sp_configure 'max server memory', @sqlmAX;
+EXEC sp_configure 'max server memory', @sqlmemory;
  -- change to #GB * 1024, leave 2 GB per system for OS, 4GB if over 16GB RAM
 RECONFIGURE WITH OVERRIDE;
 
