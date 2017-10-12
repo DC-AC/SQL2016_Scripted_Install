@@ -48,7 +48,7 @@ GO
 ALTER DATABASE master MODIFY FILE (NAME = mastlog, FILEGROWTH = 100MB);
 GO
 
-sp_configure 'set advanced options', 1
+sp_configure 'show advanced options', 1
 GO
 RECONFIGURE WITH OVERRIDE
 GO
